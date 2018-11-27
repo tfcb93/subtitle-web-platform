@@ -1,0 +1,23 @@
+{
+  "name": "subtitle-web-platform-root",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "client": "cd subtitle-web-platform && npm start",
+    "server": "nodemon server.js",
+    "dev": "concurrently --kill-others-on-fail \"npm run --silent server\" \"npm run --silent client\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thiago Borges",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "multer": "^1.4.1",
+    "subtitle-data-parser": "^1.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^4.1.0"
+  }
+}
