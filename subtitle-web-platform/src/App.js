@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
 
   state = {
     response: '',
-    post: '',
-    responseToPost: ''
+    sedding: false,
+    gettingCsv: false,
+    gettingJson: false,
+    sent: false
   }
 
 
@@ -30,51 +31,69 @@ class App extends Component {
   }
 
   handleSubmit = async (e,file) => {
+    this.setState({
+      sedding:true
+    })
     e.preventDefault()
     const file_input = document.getElementById("file_input")
+    window.localStorage.setItem("file_name",(file_input.files[0].name).replace('.srt',''))
     let data = new FormData()
     data.append('file', file_input.files[0])
-     const response = await fetch('/api/submit-file', {
+      await fetch('/api/submit-file', {
        method: 'POST',
        headers: {
          //'Content-Type': 'multipart/form-data',
        },
        body: data,
-     })
- 
-     const body = await response.json()
- 
-     this.setState({
-       responseToPost: body
-     })
+     }).then(res =>
+        this.setState({
+          sedding:false,
+          sent: true
+        })
+      )
+  }
 
-     console.log(this.state.responseToPost)
+  handleDownloadJson(){
+    console.log('json')
+    fetch('/api/' + window.localStorage.getItem('file_name') + '.json',{
+      method: 'GET'
+    })
+  }
+
+  handleDownloadCsv(){
+    console.log('csv')
+    fetch('/api/csv',{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(
+        {
+          'file_name': window.localStorage.getItem('file_name')
+      })
+    })
   }
 
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-        <h3>Submeter legenda</h3>
-          <form onSubmit={this.handleSubmit}>
-            <input id="file_input"  type="file" name="file"/>
-            <button type="submit">but</button>
-          </form>
-      </div>
-    );
+    if(!this.state.sent){
+      return (
+        <div className="App">
+          <h3>Submeter legenda</h3>
+            <form onSubmit={this.handleSubmit}>
+              <input id="file_input"  type="file" name="file"/>
+              <button type="submit">but</button>
+            </form>
+        </div>
+      )
+    }else{
+      return(
+        <div className="App">
+          <h3>Download dos dados</h3>
+            <button onClick={this.handleDownloadJson}>JSON</button>
+            <button onClick={this.handleDownloadCsv}>CSV</button>
+        </div>
+      )
+    }
   }
 }
 

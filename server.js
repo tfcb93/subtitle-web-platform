@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const sub = require('subtitle-data-parser')
+const fs = require('fs')
 
 const app = express()
 const port = process.env.PORT || 5000 //Define a porta do servidor
@@ -34,10 +35,24 @@ let subOutput = {}
 app.post('/api/submit-file', upload.single('file'),(req,res) => {
     //console.log(req.file)
     //console.log(req.file.originalname)
+    const outName = req.file.originalname.replace('.srt','')
     subOutput = sub.Parser('./temp/'+req.file.originalname)
-    res.send(subOutput)
+    fs.writeFile('temp/' + outName + '.json',JSON.stringify(subOutput),'utf8',() => {})
+    sub.ToCSV(subOutput.subs,subOutput.greatLineNumber,'temp/' + outName)
+    //res.send(subOutput)
+})
+
+app.post('/api/:file(*)',(req,res) => {
+    console.log('in')
+    console.log(req.params.file)
+    res.download('/temp/' + req.params.file)
+})
+
+app.post('/api/csv',(req,res) => {
+    console.log(req.body.file_name)
+    res.download('temp/' + req.body.file_name + '.csv')
 })
 
 app.listen(port, () =>
-    console.log('listening to the server bitch')
+    console.log('listening to the server')
 )
